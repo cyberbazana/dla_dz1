@@ -1,0 +1,11 @@
+train: [] 
+inference:
+  - _target_: src.metrics.WERMetric
+    name: "WER"
+    text_encoder: ${text_encoder}
+    decoder: ${decoder}
+
+  - _target_: src.metrics.CERMetric
+    name: CER
+    text_encoder: ${text_encoder}
+    decoder: ${decoder}

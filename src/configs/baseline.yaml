@@ -1,0 +1,44 @@
+defaults:
+  - model: conformer
+  - decoder: greedy
+  - datasets: librispeech_100
+  - transforms: noaug
+  - writer: wandb
+  - metrics: ctc
+  - dataloader: batch_10
+  - _self_
+
+optimizer:
+  _target_: torch.optim.AdamW
+  lr: 3e-4
+  weight_decay: 1e-2
+
+lr_scheduler:
+  _target_: torch.optim.lr_scheduler.OneCycleLR
+  max_lr: 3e-4
+  pct_start: 0.1
+  steps_per_epoch: ${trainer.epoch_len}
+  epochs: ${trainer.n_epochs}
+  anneal_strategy: cos
+
+loss_function:
+  _target_: src.loss.CTCLossWrapper
+  zero_infinity: true
+
+text_encoder:
+  _target_: src.text_encoder.CTCTextEncoder
+
+trainer:
+  log_step: 100
+  n_epochs: 30
+  epoch_len: None
+  device_tensors: [spectrogram, text_encoded]
+  resume_from: null
+  device: auto
+  override: false
+  monitor: "min val_WER"
+  save_period: 5
+  early_stop: ${trainer.n_epochs} 
+  save_dir: saved
+  seed: 1
+  skip_oom: false

@@ -1,0 +1,3 @@
+_target_: src.search_strategy.BeamDecoder
+blank_id: 0
+beam_size: 5

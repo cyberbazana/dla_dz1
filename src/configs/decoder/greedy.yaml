@@ -1,0 +1,2 @@
+_target_: src.search_strategy.GreedyDecoder
+blank_id: 0

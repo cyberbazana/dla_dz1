@@ -1,0 +1,11 @@
+_target_: src.model.CTCModel
+
+encoder:
+  _target_: src.model.ConformerEncoder
+  input_dim: 80
+  d_model: 144
+  num_layers: 16
+  num_heads: 4
+  expansion: 4
+  conv_kernel_size: 32
+  dropout: 0.1
