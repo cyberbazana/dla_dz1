@@ -2,6 +2,7 @@ import logging
 import random
 
 import numpy as np
+import soundfile as sf
 import torch
 import torchaudio
 from torch.utils.data import Dataset
@@ -83,12 +84,15 @@ class BaseDataset(Dataset):
         audio = self.load_audio(audio_path)
         text = data_dict["text"]
         text_encoded = self.text_encoder.encode(text)
-        
+
         # Apply audio transforms if they exist
-        audio_transform = (self.instance_transforms.get("audio_aug") if self.instance_transforms is not None else None)
+        audio_transform = (
+            self.instance_transforms.get("audio_aug")
+            if self.instance_transforms is not None
+            else None
+        )
         if audio_transform is not None:
             audio = audio_transform(audio)
-
 
         spectrogram = self.get_spectrogram(audio)
 
@@ -99,8 +103,6 @@ class BaseDataset(Dataset):
             "text_encoded": text_encoded,
             "audio_path": audio_path,
         }
-        
-        
 
         # Note: you may want to preserve both audio in time domain and
         # in time-frequency domain for logging
@@ -115,11 +117,14 @@ class BaseDataset(Dataset):
         return len(self._index)
 
     def load_audio(self, path):
-        audio_tensor, sr = torchaudio.load(path)
-        audio_tensor = audio_tensor[0:1, :]  # remove all channels but the first
-        target_sr = self.target_sr
-        if sr != target_sr:
-            audio_tensor = torchaudio.functional.resample(audio_tensor, sr, target_sr)
+        audio, sr = sf.read(path, dtype="float32", always_2d=True)
+        audio_tensor = torch.from_numpy(audio[:, 0]).unsqueeze(0)
+
+        if sr != self.target_sr:
+            audio_tensor = torchaudio.functional.resample(
+                audio_tensor, sr, self.target_sr
+            )
+
         return audio_tensor
 
     def get_spectrogram(self, audio):
@@ -150,7 +155,10 @@ class BaseDataset(Dataset):
         """
         if self.instance_transforms is not None:
             for transform_name in self.instance_transforms.keys():
-                if transform_name in {"audio_aug", "get_spectrogram"}: #audio already done
+                if transform_name in {
+                    "audio_aug",
+                    "get_spectrogram",
+                }:  # audio already done
                     continue  # skip special key
                 instance_data[transform_name] = self.instance_transforms[
                     transform_name

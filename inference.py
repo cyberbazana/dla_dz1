@@ -1,7 +1,5 @@
 import warnings
 
-from poetry import config
-
 import hydra
 import torch
 from hydra.utils import instantiate

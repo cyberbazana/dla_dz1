@@ -1,22 +1,25 @@
 from pathlib import Path
 
 import pandas as pd
+import torch
+from hydra.utils import instantiate
+from torchvision.utils import save_image
 
 from src.logger.utils import plot_spectrogram
 from src.metrics.tracker import MetricTracker
 from src.metrics.utils import calc_cer, calc_wer
 from src.trainer.base_trainer import BaseTrainer
-from hydra.utils import instantiate
 
 
 class Trainer(BaseTrainer):
     """
     Trainer class. Defines the logic of batch logging and processing.
     """
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.decoder = instantiate(self.config.decoder)
+        # self.scaler = torch.amp.GradScaler(torch.device(self.device).type, enabled=True)
 
     def process_batch(self, batch, metrics: MetricTracker):
         """
@@ -44,6 +47,11 @@ class Trainer(BaseTrainer):
         if self.is_train:
             metric_funcs = self.metrics["train"]
             self.optimizer.zero_grad()
+        """with torch.autocast(
+            device_type=torch.device(self.device).type,
+            dtype=torch.float16,
+            enabled=True,
+        ):"""
 
         outputs = self.model(**batch)
         batch.update(outputs)
@@ -52,6 +60,12 @@ class Trainer(BaseTrainer):
         batch.update(all_losses)
 
         if self.is_train:
+            """self.scaler.scale(batch["loss"]).backward()
+            self.scaler.unscale_(self.optimizer)
+            self._clip_grad_norm()
+            self.scaler.step(self.optimizer)
+            self.scaler.update()"""
+
             batch["loss"].backward()  # sum of all losses is always called loss
             self._clip_grad_norm()
             self.optimizer.step()
@@ -92,6 +106,8 @@ class Trainer(BaseTrainer):
     def log_spectrogram(self, spectrogram, **batch):
         spectrogram_for_plot = spectrogram[0].detach().cpu()
         image = plot_spectrogram(spectrogram_for_plot)
+        save_image(image, "spectrogram.png")
+
         self.writer.add_image("spectrogram", image)
 
     def log_predictions(
@@ -106,9 +122,11 @@ class Trainer(BaseTrainer):
             probs = probs[:length]
             pred = self.decoder.decode(probs)
             predictions.append(self.text_encoder.decode(pred))
-        
+
         rows = {}
-        for pred, target, audio_path in list(zip(predictions, text, audio_path))[:examples_to_log]:
+        for pred, target, audio_path in list(zip(predictions, text, audio_path))[
+            :examples_to_log
+        ]:
             target = self.text_encoder.normalize_text(target)
             wer = calc_wer(target, pred) * 100
             cer = calc_cer(target, pred) * 100

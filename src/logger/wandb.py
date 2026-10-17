@@ -2,6 +2,7 @@ from datetime import datetime
 
 import numpy as np
 import pandas as pd
+from torchvision.transforms import ToPILImage
 
 
 class WandBWriter:
@@ -153,8 +154,9 @@ class WandBWriter:
             image (Path | ndarray | Image): image in the WandB-friendly
                 format.
         """
+        pil_image = ToPILImage()(image.detach().cpu().float().clamp(0, 1))
         self.wandb.log(
-            {self._object_name(image_name): self.wandb.Image(image)}, step=self.step
+            {self._object_name(image_name): self.wandb.Image(pil_image)}, step=self.step
         )
 
     def add_audio(self, audio_name, audio, sample_rate=None):

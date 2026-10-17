@@ -7,13 +7,12 @@ defaults:
   - transforms: noaug
   - _self_
 
-
 text_encoder:
   _target_: src.text_encoder.CTCTextEncoder
 
 inferencer:
-  device_tensors: ["spectogram"] # which tensors should be on device (ex. GPU)
-  device: auto # device name or "auto"
-  save_path: "TEST" # any name here, can be a dataset name
+  device_tensors: ["spectrogram"]
+  device: "cuda:0"
+  save_path: "TEST"
   seed: 1
-  from_pretrained: null
+  from_pretrained: "baseline/testing/checkpoint-epoch30.pth"

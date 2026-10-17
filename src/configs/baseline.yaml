@@ -31,14 +31,14 @@ text_encoder:
 trainer:
   log_step: 100
   n_epochs: 30
-  epoch_len: None
+  epoch_len: 2853
   device_tensors: [spectrogram, text_encoded]
   resume_from: null
-  device: auto
-  override: false
+  device: "cuda:0"
+  override: true
   monitor: "min val_WER"
   save_period: 5
-  early_stop: ${trainer.n_epochs} 
+  early_stop: ${trainer.n_epochs}
   save_dir: saved
   seed: 1
   skip_oom: false

@@ -1,5 +1,9 @@
 import torch
 from torch.nn.utils.rnn import pad_sequence
+from torchvision.utils import save_image
+
+from src.logger.utils import plot_spectrogram
+
 
 def collate_fn(dataset_items: list[dict]):
     """
@@ -14,22 +18,43 @@ def collate_fn(dataset_items: list[dict]):
             of the tensors.
     """
 
-    audio = pad_sequence([item["audio"].squeeze(0) for item in dataset_items], batch_first=True,
-                         padding_value=0.0).unsqueeze(1)  # [B, 1, T]
+    audio = pad_sequence(
+        [item["audio"].squeeze(0) for item in dataset_items],
+        batch_first=True,
+        padding_value=0.0,
+    ).unsqueeze(
+        1
+    )  # [B, 1, T]
 
     spectrograms = [item["spectrogram"].transpose(0, 1) for item in dataset_items]
-    spectrogram = pad_sequence(spectrograms, batch_first=True, padding_value=0.0).transpose(1, 2)  # [B, F, T]
+    spectrogram = pad_sequence(
+        spectrograms, batch_first=True, padding_value=0.0
+    ).transpose(
+        1, 2
+    )  # [B, F, T]
 
-    text_encoded = pad_sequence([item["text_encoded"].reshape(-1) for item in dataset_items],
-                        batch_first=True, padding_value=0)
+    text_encoded = pad_sequence(
+        [item["text_encoded"].reshape(-1) for item in dataset_items],
+        batch_first=True,
+        padding_value=0,
+    )
 
+    """image = plot_spectrogram(spectrogram[0], name="wow")
+    save_image(image, "spectrogram.png")
+    a = 0 /0 """
     return {
         "audio": audio,
         "spectrogram": spectrogram,
         "text": [item["text"] for item in dataset_items],
         "text_encoded": text_encoded,
         "audio_path": [item["audio_path"] for item in dataset_items],
-        "audio_length": torch.tensor([item["audio"].shape[-1] for item in dataset_items], dtype=torch.long),
-        "spectrogram_length": torch.tensor([item["spectrogram"].shape[-1] for item in dataset_items], dtype=torch.long),
-        "text_encoded_length": torch.tensor([item["text_encoded"].numel() for item in dataset_items], dtype=torch.long)    
+        "audio_length": torch.tensor(
+            [item["audio"].shape[-1] for item in dataset_items], dtype=torch.long
+        ),
+        "spectrogram_length": torch.tensor(
+            [item["spectrogram"].shape[-1] for item in dataset_items], dtype=torch.long
+        ),
+        "text_encoded_length": torch.tensor(
+            [item["text_encoded"].numel() for item in dataset_items], dtype=torch.long
+        ),
     }

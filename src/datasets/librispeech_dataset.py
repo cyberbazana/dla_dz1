@@ -2,9 +2,10 @@ import json
 import os
 import shutil
 from pathlib import Path
+from urllib.request import urlretrieve
 
+import soundfile as sf
 import torchaudio
-import wget
 from tqdm import tqdm
 
 from src.datasets.base_dataset import BaseDataset
@@ -46,7 +47,7 @@ class LibrispeechDataset(BaseDataset):
     def _load_part(self, part):
         arch_path = self._data_dir / f"{part}.tar.gz"
         print(f"Loading part {part}")
-        wget.download(URL_LINKS[part], str(arch_path))
+        urlretrieve(URL_LINKS[part], str(arch_path))
         shutil.unpack_archive(arch_path, self._data_dir)
         for fpath in (self._data_dir / "LibriSpeech").iterdir():
             shutil.move(str(fpath), str(self._data_dir / fpath.name))
@@ -84,8 +85,8 @@ class LibrispeechDataset(BaseDataset):
                     f_id = line.split()[0]
                     f_text = " ".join(line.split()[1:]).strip()
                     flac_path = flac_dir / f"{f_id}.flac"
-                    t_info = torchaudio.info(str(flac_path))
-                    length = t_info.num_frames / t_info.sample_rate
+                    t_info = sf.info(str(flac_path))
+                    length = t_info.frames / t_info.samplerate
                     index.append(
                         {
                             "path": str(flac_path.absolute().resolve()),

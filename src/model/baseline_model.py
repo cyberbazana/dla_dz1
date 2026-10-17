@@ -7,23 +7,8 @@ class BaselineModel(nn.Module):
     Simple MLP
     """
 
-    def __init__(self, n_feats, n_tokens, fc_hidden=512):
-        """
-        Args:
-            n_feats (int): number of input features.
-            n_tokens (int): number of tokens in the vocabulary.
-            fc_hidden (int): number of hidden features.
-        """
+    def __init__(self):
         super().__init__()
-
-        self.net = Sequential(
-            # people say it can approximate any function...
-            nn.Linear(in_features=n_feats, out_features=fc_hidden),
-            nn.ReLU(),
-            nn.Linear(in_features=fc_hidden, out_features=fc_hidden),
-            nn.ReLU(),
-            nn.Linear(in_features=fc_hidden, out_features=n_tokens),
-        )
 
     def forward(self, spectrogram, spectrogram_length, **batch):
         """
@@ -36,10 +21,7 @@ class BaselineModel(nn.Module):
             output (dict): output dict containing log_probs and
                 transformed lengths.
         """
-        output = self.net(spectrogram.transpose(1, 2))
-        log_probs = nn.functional.log_softmax(output, dim=-1)
-        log_probs_length = self.transform_input_lengths(spectrogram_length)
-        return {"log_probs": log_probs, "log_probs_length": log_probs_length}
+        raise NotImplementedError("This method should be implemented in subclasses.")
 
     def transform_input_lengths(self, input_lengths):
         """

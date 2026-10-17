@@ -1,4 +1,4 @@
-train: [] 
+train: []
 inference:
   - _target_: src.metrics.WERMetric
     name: "WER"

@@ -4,14 +4,13 @@ from torch.nn import CTCLoss
 
 
 class CTCLossWrapper(CTCLoss):
-    
     def __init__(self, zero_infinity: bool = True, **kwargs):
         super().__init__(zero_infinity=zero_infinity, **kwargs)
-        
+
     def forward(
         self, log_probs, log_probs_length, text_encoded, text_encoded_length, **batch
     ) -> Tensor:
-        log_probs_t = torch.transpose(log_probs, 0, 1)
+        log_probs_t = torch.transpose(log_probs.float(), 0, 1)
 
         loss = super().forward(
             log_probs=log_probs_t,
