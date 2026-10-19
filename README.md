@@ -1,19 +1,5 @@
 # Automatic Speech Recognition (ASR) with PyTorch
 
-<p align="center">
-  <a href="#about">About</a> •
-  <a href="#installation">Installation</a> •
-  <a href="#how-to-use">How To Use</a> •
-  <a href="#credits">Credits</a> •
-  <a href="#license">License</a>
-</p>
-
-## About
-
-This repository contains a template for solving ASR task with PyTorch. This template branch is a part of the [HSE DLA course](https://github.com/markovka17/dla) ASR homework. Some parts of the code are missing (or do not follow the most optimal design choices...) and students are required to fill these parts themselves (as well as writing their own models, etc.).
-
-See the task assignment [here](https://github.com/markovka17/dla/tree/2024/hw1_asr).
-
 ## Installation
 
 Follow these steps to install the project:
@@ -49,10 +35,17 @@ Follow these steps to install the project:
    pip install -r requirements.txt
    ```
 
-2. Install `pre-commit`:
+
    ```bash
-   pre-commit install
+   pip install pyctcdecode==0.5.0 --no-deps
    ```
+
+2. Download all required files
+
+   ```bash
+   !python -c "from huggingface_hub import hf_hub_download; hf_hub_download(repo_id='cyberbazana/dz1_dla', filename='model_best.pth', local_dir='./saved/greedy+aug_ver_article')"
+   ```
+
 
 ## How To Use
 
@@ -62,13 +55,27 @@ To train a model, run the following command:
 python3 train.py -cn=CONFIG_NAME HYDRA_CONFIG_ARGUMENTS
 ```
 
-Where `CONFIG_NAME` is a config from `src/configs` and `HYDRA_CONFIG_ARGUMENTS` are optional arguments.
+Where `CONFIG_NAME` is a config from `src/configs` and `HYDRA_CONFIG_ARGUMENTS` are optional arguments. Structure of the project is quite complicated.
+
+If you want to change augmentations, then open `src/configs/transforms/aug.yaml`. All possible and valid augmentations are there (PeakNormalize is not used), so you can play with params.
+
+If you want to change training params (lr, optimizer, n_epochs), all of them are in greedy+aug.yaml (you can create your own one, this one is just an original one for best accuracy).
+
+Unfortunately, you can't change a dataset for training. There are only librispeech type ones and common voice.
+
+If you want to use a different model, then create a .yaml file in `src/configs/model`, there are some examples already.
 
 To run inference (evaluate the model or save predictions):
 
 ```bash
 python3 inference.py HYDRA_CONFIG_ARGUMENTS
 ```
+
+If you want to run inference on your dataset, then check demo, this point is thoroughly covered there.
+
+If validation is too slow, change a config in `src/configs/dataloader`. Current way of organizing them is quite bad.
+
+WARNING. If you want to use lm_beam, do not forget to change path in inference.yaml and location of the model. By default, it is ./saved/greedy+aug_ver_article there.
 
 ## Credits
 

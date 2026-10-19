@@ -5,6 +5,7 @@ defaults:
   - datasets: librispeech_eval
   - dataloader: batch_2
   - transforms: noaug
+  - writer: null
   - _self_
 
 text_encoder:

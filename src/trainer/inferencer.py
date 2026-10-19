@@ -29,6 +29,7 @@ class Inferencer(BaseTrainer):
         metrics=None,
         batch_transforms=None,
         skip_model_load=False,
+        writer=None,
     ):
         """
         Initialize the Inferencer.
@@ -53,6 +54,7 @@ class Inferencer(BaseTrainer):
                 pre-trained checkpoint path. Set this argument to True if
                 the model desirable weights are defined outside of the
                 Inferencer Class.
+            writer (Writer | None): writer for logging.
         """
         assert (
             skip_model_load or config.inferencer.get("from_pretrained") is not None
@@ -63,7 +65,7 @@ class Inferencer(BaseTrainer):
 
         self.device = device
         self.decoder = decoder
-
+        self.writer = writer
         self.model = model
         self.batch_transforms = batch_transforms
 
@@ -142,7 +144,6 @@ class Inferencer(BaseTrainer):
         # Use if you need to save predictions on disk
 
         batch_size = batch["logits"].shape[0]
-        current_id = batch_idx * batch_size
 
         lengths = batch["log_probs_length"]
         log_probs = batch["log_probs"]
@@ -151,15 +152,14 @@ class Inferencer(BaseTrainer):
             length = int(lengths[i].item())
             pred_tokens = self.decoder.decode(log_probs[i, :length])
             pred_text = self.text_encoder.decode(pred_tokens)
-            output_id = current_id + i
             output = {"pred": pred_text}
             if "text" in batch:
                 output["text"] = self.text_encoder.normalize_text(batch["text"][i])
             if self.save_path is not None:
                 audio_path = Path(batch["audio_path"][i])
                 output = self.save_path / part / f"{audio_path.stem}.txt"
-                output.write_text(pred_text.strip() + '\n', encoding='utf-8')
-                #torch.save(output, self.save_path / part / f"output_{output_id}.pth")
+                output.write_text(pred_text.strip() + "\n", encoding="utf-8")
+                # torch.save(output, self.save_path / part / f"output_{output_id}.pth")
 
         return batch
 
@@ -195,5 +195,9 @@ class Inferencer(BaseTrainer):
                     part=part,
                     metrics=self.evaluation_metrics,
                 )
+        logs = self.evaluation_metrics.result()
+        if self.writer is not None:
+            self.writer.set_step(0, part)
+            self.writer.add_scalars(logs)
 
-        return self.evaluation_metrics.result()
+        return logs

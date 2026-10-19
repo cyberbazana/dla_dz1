@@ -1,9 +1,10 @@
-torch
-torchvision
-torchaudio
+# Recommended environment: Python 3.11 (64-bit)
+torch==2.14.1
+torchvision==0.29.1
+torchaudio==2.11.0
 datasets
 soundfile
-numpy
+numpy==2.4.6
 torch_audiomentations
 tqdm
 matplotlib
@@ -12,6 +13,13 @@ wandb
 comet_ml
 hydra-core
 torchcodec
+huggingface_hub
+
+# LM dependencies
+# pyctcdecode==0.5.0 is not listed.
+# Install it after this file with: pip install pyctcdecode==0.5.0 --no-deps
+kenlm-ex==0.2.1
+pygtrie==2.5.0
 
 black
 isort
