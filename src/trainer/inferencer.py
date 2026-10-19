@@ -1,9 +1,9 @@
 import torch
+from hydra.utils import instantiate
 from tqdm.auto import tqdm
 
 from src.metrics.tracker import MetricTracker
 from src.trainer.base_trainer import BaseTrainer
-from hydra.utils import instantiate
 
 
 class Inferencer(BaseTrainer):
@@ -124,7 +124,7 @@ class Inferencer(BaseTrainer):
                 the dataloader (possibly transformed via batch transform)
                 and model outputs.
         """
-        
+
         batch = self.move_batch_to_device(batch)
         batch = self.transform_batch(batch)  # transform batch on device -- faster
 
@@ -133,14 +133,15 @@ class Inferencer(BaseTrainer):
 
         if metrics is not None:
             for met in self.metrics["inference"]:
-                metrics.update(met.name, met(**batch))
+                value, n = met(**batch)
+                metrics.update(met.name, value, n=n)
 
         # Some saving logic. This is an example
         # Use if you need to save predictions on disk
 
         batch_size = batch["logits"].shape[0]
         current_id = batch_idx * batch_size
-        
+
         lengths = batch["log_probs_length"]
         log_probs = batch["log_probs"]
 

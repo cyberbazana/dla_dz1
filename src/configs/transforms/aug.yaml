@@ -10,7 +10,7 @@ instance_transforms:
         - _target_: src.transforms.wav_augs.add_noise.AddNoise
           min_snr_in_db: 5.0
           max_snr_in_db: 20.0
-          p: 0.7
+          p: 0.4
 
         - _target_: src.transforms.wav_augs.speed_change.SpeedChanger
           sample_rate: 16000
@@ -32,11 +32,10 @@ instance_transforms:
       _args_:
         - _target_: src.transforms.spec_augs.freq_corrupt.FreqCorrupt
           freq_mask_param: 5
-          num_masks: 2
+          num_masks: 10
           p: 0.50
         - _target_: src.transforms.spec_augs.time_corrupt.TimeCorrupt
-          time_mask_param: 15
-          num_masks: 2
+          num_masks: 10
           p: 0.5
 
   inference:

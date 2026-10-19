@@ -4,9 +4,8 @@ import torch
 from torch import Tensor
 
 from src.metrics.base_metric import BaseMetric
-from src.metrics.utils import calc_wer
+from src.metrics.utils import calc_dist
 
-# LM versions
 # Note: they can be written in a pretty way
 # Note 2: overall metric design can be significantly improved
 
@@ -20,8 +19,8 @@ class WERMetric(BaseMetric):
     def __call__(
         self, log_probs: Tensor, log_probs_length: Tensor, text: List[str], **kwargs
     ):
-        wers = []
-        
+        total_err = 0
+        total_words = 0
         for probs, length, target_text in zip(log_probs, log_probs_length, text):
             length = int(length.item())
             pred_tokens = self.decoder.decode(probs[:length])
@@ -29,6 +28,9 @@ class WERMetric(BaseMetric):
 
             target_text = self.text_encoder.normalize_text(target_text)
             pred_text = self.text_encoder.normalize_text(pred_text)
-            wers.append(calc_wer(target_text, pred_text))
-            
-        return sum(wers) / max(len(wers), 1)
+            target_words = target_text.split()
+            pred_words = pred_text.split()
+            total_err += calc_dist(target_words, pred_words)
+            total_words += len(target_words)
+
+        return total_err / max(total_words, 1), total_words

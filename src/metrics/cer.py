@@ -4,7 +4,7 @@ import torch
 from torch import Tensor
 
 from src.metrics.base_metric import BaseMetric
-from src.metrics.utils import calc_cer
+from src.metrics.utils import calc_dist
 
 # lm versions
 # Note: they can be written in a pretty way
@@ -20,7 +20,8 @@ class CERMetric(BaseMetric):
     def __call__(
         self, log_probs: Tensor, log_probs_length: Tensor, text: List[str], **kwargs
     ):
-        cers = []
+        total_err = 0
+        total_chars = 0
         for probs, length, target_text in zip(log_probs, log_probs_length, text):
             length = int(length.item())
             pred_tokens = self.decoder.decode(probs[:length])
@@ -28,6 +29,10 @@ class CERMetric(BaseMetric):
 
             target_text = self.text_encoder.normalize_text(target_text)
             pred_text = self.text_encoder.normalize_text(pred_text)
-            cers.append(calc_cer(target_text, pred_text))
 
-        return sum(cers) / max(len(cers), 1)
+            target_chars = list(target_text)
+            pred_chars = list(pred_text)
+            total_err += calc_dist(target_chars, pred_chars)
+            total_chars += len(target_chars)
+
+        return total_err / max(total_chars, 1), total_chars

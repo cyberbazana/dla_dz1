@@ -5,9 +5,8 @@ from torch import Tensor, nn
 
 
 class TimeCorrupt(nn.Module):
-    def __init__(self, time_mask_param, num_masks=2, p=0.4):
+    def __init__(self, num_masks=2, p=0.4):
         super().__init__()
-        self.time_mask_param = time_mask_param
         self.num_masks = num_masks
         self.p = p
 
@@ -15,7 +14,7 @@ class TimeCorrupt(nn.Module):
         if random.random() >= self.p:
             return spectrogram
         T = spectrogram.shape[-1]
-        max_width = min(self.time_mask_param, T - 1)
+        max_width = int((T - 1) * 0.02)
         result = spectrogram.clone()
 
         for _ in range(self.num_masks):

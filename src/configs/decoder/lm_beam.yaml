@@ -1,6 +1,6 @@
 _target_: src.search_strategy.lm_decoder.LMDecoder
 blank_id: 0
-beam_size: 20
-alpha: 0.5
+beam_size: 100
+alpha: 0.6
 beta: 1.0
 lm_path: data/lm/3-gram.pruned.3e-7.arpa

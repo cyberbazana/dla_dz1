@@ -15,4 +15,4 @@ inferencer:
   device: "cuda:0"
   save_path: "TEST"
   seed: 1
-  from_pretrained: "saved/greedy+aug_ver2/model_best.pth"
+  from_pretrained: "saved/greedy+aug_ver_article/model_best.pth"
