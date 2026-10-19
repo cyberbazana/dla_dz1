@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import torch
 from hydra.utils import instantiate
 from tqdm.auto import tqdm
@@ -154,8 +156,10 @@ class Inferencer(BaseTrainer):
             if "text" in batch:
                 output["text"] = self.text_encoder.normalize_text(batch["text"][i])
             if self.save_path is not None:
-                # you can use safetensors or other lib here
-                torch.save(output, self.save_path / part / f"output_{output_id}.pth")
+                audio_path = Path(batch["audio_path"][i])
+                output = self.save_path / part / f"{audio_path.stem}.txt"
+                output.write_text(pred_text.strip() + '\n', encoding='utf-8')
+                #torch.save(output, self.save_path / part / f"output_{output_id}.pth")
 
         return batch
 
