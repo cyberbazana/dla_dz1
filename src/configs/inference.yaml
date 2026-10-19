@@ -1,6 +1,6 @@
 defaults:
-  - model: conformer
-  - decoder: greedy
+  - model: conformer_d_model_256
+  - decoder: lm_beam
   - metrics: ctc
   - datasets: librispeech_eval
   - dataloader: batch_2
@@ -15,4 +15,4 @@ inferencer:
   device: "cuda:0"
   save_path: "TEST"
   seed: 1
-  from_pretrained: "baseline/testing/checkpoint-epoch30.pth"
+  from_pretrained: "saved/greedy+aug_ver2/model_best.pth"

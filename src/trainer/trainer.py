@@ -19,7 +19,7 @@ class Trainer(BaseTrainer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.decoder = instantiate(self.config.decoder)
-        # self.scaler = torch.amp.GradScaler(torch.device(self.device).type, enabled=True)
+        self.scaler = torch.amp.GradScaler(torch.device(self.device).type, enabled=True)
 
     def process_batch(self, batch, metrics: MetricTracker):
         """
@@ -47,28 +47,28 @@ class Trainer(BaseTrainer):
         if self.is_train:
             metric_funcs = self.metrics["train"]
             self.optimizer.zero_grad()
-        """with torch.autocast(
+        with torch.autocast(
             device_type=torch.device(self.device).type,
             dtype=torch.float16,
             enabled=True,
-        ):"""
+        ):
+            outputs = self.model(**batch)
+            batch.update(outputs)
 
-        outputs = self.model(**batch)
-        batch.update(outputs)
-
-        all_losses = self.criterion(**batch)
+            all_losses = self.criterion(**batch)
         batch.update(all_losses)
 
         if self.is_train:
-            """self.scaler.scale(batch["loss"]).backward()
+            self.scaler.scale(batch["loss"]).backward()
             self.scaler.unscale_(self.optimizer)
             self._clip_grad_norm()
             self.scaler.step(self.optimizer)
-            self.scaler.update()"""
-
+            self.scaler.update()
+            """
             batch["loss"].backward()  # sum of all losses is always called loss
             self._clip_grad_norm()
             self.optimizer.step()
+            """
             if self.lr_scheduler is not None:
                 self.lr_scheduler.step()
 

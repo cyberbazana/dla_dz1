@@ -1,0 +1,27 @@
+import random
+
+from torch import Tensor, nn
+
+
+class FreqCorrupt(nn.Module):
+    def __init__(self, freq_mask_param=10, num_masks=2, p=0.4):
+        super().__init__()
+        self.freq_mask_param = freq_mask_param
+        self.num_masks = num_masks
+        self.p = p
+
+    def __call__(self, spectrogram):
+        if random.random() >= self.p:
+            return spectrogram
+        T = spectrogram.shape[-2]
+        max_width = min(self.freq_mask_param, T - 1)
+        result = spectrogram.clone()
+
+        for _ in range(self.num_masks):
+            width = random.randint(0, max_width)
+            if width == 0:
+                continue
+            st = random.randint(0, T - width)
+            result[..., st : st + width, :] = 0.0
+
+        return result

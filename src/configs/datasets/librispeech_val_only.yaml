@@ -1,0 +1,14 @@
+val_clean:
+  _target_: src.datasets.LibrispeechDataset
+  part: dev-clean
+  max_audio_length: null
+  max_text_length: null
+  limit: null
+  instance_transforms: ${transforms.instance_transforms.inference}
+val_other:
+  _target_: src.datasets.LibrispeechDataset
+  part: dev-other
+  max_audio_length: null
+  max_text_length: null
+  limit: null
+  instance_transforms: ${transforms.instance_transforms.inference}

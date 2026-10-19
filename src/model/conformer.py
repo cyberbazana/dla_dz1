@@ -191,7 +191,6 @@ class ConformerEncoder(nn.Module):
         )
         self.positional_encoding = SinusoidEncoding(d_model)
         self.conv_sub = ConvSubsampling(input_dim, d_model)
-        # self.apply(self._init_weights)
 
     def forward(self, spectrogram, spectrogram_length, **kwargs):
         x, lengths = self.conv_sub(spectrogram, spectrogram_length)
@@ -206,16 +205,3 @@ class ConformerEncoder(nn.Module):
 
     def transform_input_lengths(self, input_lengths):
         return self.conv_sub.transform_input_lengths(input_lengths)
-
-    @staticmethod
-    def _init_weights(module):
-        if isinstance(module, (nn.Linear, nn.Conv1d, nn.Conv2d)):
-            nn.init.xavier_uniform_(module.weight)
-            if module.bias is not None:
-                nn.init.zeros_(module.bias)
-
-        elif isinstance(module, (nn.LayerNorm, nn.BatchNorm1d)):
-            if module.weight is not None:
-                nn.init.ones_(module.weight)
-            if module.bias is not None:
-                nn.init.zeros_(module.bias)
