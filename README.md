@@ -80,7 +80,7 @@ If you want to run inference on your dataset, then check a demo, this point is t
 To run inference on a custom dataset use this script.
 
 ```bash
-!python inference.py -cn=inference inference.save_path="PATH" datasets=custom_dataset datasets.inference.data_dir=path/to/dataset"
+!python inference.py -cn=inference inferencer.save_path="PATH" datasets=custom_dataset datasets.inference.data_dir=path/to/dataset"
 ```
 
 Data will be stored in `/data/saved/TEST/inference`.

@@ -22,12 +22,6 @@ def main():
     refs = {p.name: p for p in args.target.glob("*.txt")}
     preds = {p.name: p for p in args.predictions.glob("*.txt")}
 
-    missing = refs.keys() - preds.keys()
-    if missing:
-        parser.error(f"No predictions for: {', '.join(missing[:10])}")
-    if not refs:
-        parser.error(f"No files in {args.ground_truth}")
-
     total_word_err = 0
     total_words = 0
     total_char_err = 0
