@@ -15,7 +15,7 @@ class CustomDirDataset(BaseDataset):
             entry = {}
             if path.suffix in [".mp3", ".wav", ".flac", ".m4a"]:
                 entry["path"] = str(path)
-                entry["text"] = ""
+                entry["text"] = "a"
                 info = sf.info(str(path))
                 entry["audio_len"] = info.frames / info.samplerate
                 if transcription_dir and Path(transcription_dir).exists():
